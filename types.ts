@@ -17,6 +17,7 @@ export enum EntityType {
   NPC_GHOST = 'NPC_GHOST',
   NPC_RAT = 'NPC_RAT',
   ITEM_POTION = 'ITEM_POTION',
+  ITEM_QUEST = 'ITEM_QUEST',
   GOAL_SEED = 'GOAL_SEED',
 }
 
@@ -25,6 +26,13 @@ export interface Entity {
   type: EntityType;
   pos: Position;
   name: string;
+  health?: number;
+  maxHealth?: number;
+  hidden?: boolean;
+  questId?: string;
+  interactable?: boolean;
+  dialogueState?: 'idle' | 'quest_available' | 'quest_active' | 'quest_complete' | 'done';
+  dying?: boolean;
   interacted?: boolean;
 }
 
@@ -37,8 +45,8 @@ export interface GameLog {
 export interface GameState {
   playerPos: Position;
   map: TileType[][];
-  visible: boolean[][]; // Fog of war
-  explored: boolean[][]; // Memory
+  visible: boolean[][];
+  explored: boolean[][];
   entities: Entity[];
   health: number;
   maxHealth: number;
@@ -46,8 +54,11 @@ export interface GameState {
   turn: number;
   gameOver: boolean;
   gameWon: boolean;
+  quests: Quest[];
+  activeQuestId: string | null;
+  completedQuestIds: string[];
+  questLog: string[];
 }
-
 export interface LevelConfig {
   id: number;
   name: string;
@@ -62,6 +73,7 @@ export interface LevelConfig {
     potions: number;
   };
 }
+
 export enum QuestStatus {
   NOT_STARTED = 'NOT_STARTED',
   ACTIVE = 'ACTIVE',
@@ -70,11 +82,11 @@ export enum QuestStatus {
 }
 
 export enum QuestType {
-  FETCH_ARTIFACT = 'FETCH_ARTIFACT',     // Find hidden artifact and return to ghost
-  KILL_RATS = 'KILL_RATS',               // Kill N rats on this level
-  EXPLORE_ROOMS = 'EXPLORE_ROOMS',       // Visit all rooms
-  ESCORT_SPIRIT = 'ESCORT_SPIRIT',       // Guide ghost to stairs
-  FINAL_SEED = 'FINAL_SEED',             // Level 5: retrieve the Golden Seed
+  FETCH_ARTIFACT = 'FETCH_ARTIFACT',
+  KILL_RATS = 'KILL_RATS',
+  EXPLORE_ROOMS = 'EXPLORE_ROOMS',
+  ESCORT_SPIRIT = 'ESCORT_SPIRIT',
+  FINAL_SEED = 'FINAL_SEED',
 }
 
 export interface QuestObjective {
@@ -90,44 +102,20 @@ export interface Quest {
   type: QuestType;
   title: string;
   description: string;
-  giverEntityId: string;          // Ghost who gave the quest
+  giverEntityId: string;
   status: QuestStatus;
   objectives: QuestObjective[];
   rewards: QuestReward;
-  revealedEntityIds: string[];    // Entity IDs to unhide when quest starts
-  dialogueOnGive: string[];       // Dialogue lines when quest is given
-  dialogueOnComplete: string[];   // Dialogue lines on turn-in
-  dialogueOnActive: string[];     // Reminder dialogue while active
+  revealedEntityIds: string[];
+  dialogueOnGive: string[];
+  dialogueOnComplete: string[];
+  dialogueOnActive: string[];
 }
 
 export interface QuestReward {
   health?: number;
   hunger?: number;
-  unlockStairs?: boolean;         // Some quests gate stairs access
-  revealMap?: boolean;            // Reveal explored tiles
-  artifact?: string;              // Special item name
-}
-
-// Add to your Entity interface:
-export interface Entity {
-  id: string;
-  type: EntityType;
-  pos: Position;
-  name: string;
-  health?: number;
-  maxHealth?: number;
-  hidden?: boolean;
-  questId?: string;               // ADD: Links entity to a quest
-  interactable?: boolean;         // ADD: Can player interact?
-  dialogueState?: 'idle' | 'quest_available' | 'quest_active' | 'quest_complete' | 'done';  // ADD
-  dying?: boolean; // Visual effect for death
-}
-
-// Add to your GameState interface:
-export interface GameState {
-  // ... existing fields ...
-  quests: Quest[];
-  activeQuestId: string | null;
-  completedQuestIds: string[];
-  questLog: string[];             // Player-facing quest log messages
+  unlockStairs?: boolean;
+  revealMap?: boolean;
+  artifact?: string;
 }

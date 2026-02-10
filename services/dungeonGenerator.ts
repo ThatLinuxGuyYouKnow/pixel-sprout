@@ -115,15 +115,22 @@ export const generateDungeon = (levelConfig: LevelConfig) => {
         id: `ghost-${levelConfig.id}-${i}`,
         type: EntityType.NPC_GHOST,
         pos: getEmptyPos(),
-        name: 'Wandering Spirit'
+        name: 'Wandering Spirit',
+        health: 100,
+        maxHealth: 100,
+        interactable: true
       });
     }
     for (let i = 0; i < levelConfig.entityCounts.rats; i++) {
+      const ratHealth = 15 + (levelConfig.id - 1) * 5; // Scales with level
       entities.push({
         id: `rat-${levelConfig.id}-${i}`,
         type: EntityType.NPC_RAT,
         pos: getEmptyPos(),
-        name: 'Dungeon Rat'
+        name: 'Dungeon Rat',
+        health: ratHealth,
+        maxHealth: ratHealth,
+        interactable: true
       });
     }
     for (let i = 0; i < levelConfig.entityCounts.potions; i++) {
@@ -131,7 +138,8 @@ export const generateDungeon = (levelConfig: LevelConfig) => {
         id: `potion-${levelConfig.id}-${i}`,
         type: EntityType.ITEM_POTION,
         pos: getEmptyPos(),
-        name: 'Mysterious Potion'
+        name: 'Mysterious Potion',
+        interactable: true
       });
     }
 
